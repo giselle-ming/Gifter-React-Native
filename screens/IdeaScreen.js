@@ -12,7 +12,7 @@ import { AntDesign } from "@expo/vector-icons";
 
 export default function IdeaScreen({ route, navigation }) {
   const { personId } = route.params;
-  const [selectedIdea, setSelectedIdea] = useState(null); // Store the selected idea
+  const [selectedIdea, setSelectedIdea] = useState(null);
   const { people, deleteIdea } = useContext(PeopleContext);
   const [visible, setVisible] = useState(false);
   const [modalImageUrl, setModalImageUrl] = useState(null);
@@ -33,45 +33,61 @@ export default function IdeaScreen({ route, navigation }) {
   const handleDeleteIdea = () => {
     if (selectedIdea !== null) {
       deleteIdea(personId, selectedIdea);
-      setSelectedIdea(null); // Reset the selectedIdea state
+      setSelectedIdea(null);
       setDeleteModalVisible(false);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.personName}>Gift Ideas for {person?.name}</Text>
-      <FlatList
-        data={ideas}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View key={item.id} style={styles.ideaItem}>
-            {item.img && (
-              <TouchableOpacity onPress={() => showModal(item.img)}>
-                <Image
-                  source={{ uri: item.img }}
-                  style={{
-                    ...styles.ideaImage,
-                    transform: [{ rotate: "270deg" }],
+      {ideas.length === 0 ? (
+        <View style={{ justifyContent: "center", alignItems: "center" }}>
+          <Text
+            style={{ paddingBottom: 20, fontSize: 20, textAlign: "center" }}
+          >
+            No ideas for {person.name}, add something
+          </Text>
+          <Image
+            source={require("../assets/3779167.webp")}
+            style={{ width: 300, height: 300 }}
+          />
+        </View>
+      ) : (
+        <View>
+          <Text style={styles.personName}>Gift Ideas for {person.name}</Text>
+          <FlatList
+            data={ideas}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <View key={item.id} style={styles.ideaItem}>
+                {item.img && (
+                  <TouchableOpacity onPress={() => showModal(item.img)}>
+                    <Image
+                      source={{ uri: item.img }}
+                      style={{
+                        ...styles.ideaImage,
+                        transform: [{ rotate: "270deg" }],
+                      }}
+                    />
+                  </TouchableOpacity>
+                )}
+                <Text>{item.text}</Text>
+                <Button
+                  icon="trash-can"
+                  mode="contained"
+                  style={styles.deleteButton}
+                  onPress={() => {
+                    setSelectedIdea(item.id);
+                    setDeleteModalVisible(true);
                   }}
-                />
-              </TouchableOpacity>
+                >
+                  Delete
+                </Button>
+              </View>
             )}
-            <Text style={styles.ideaText}>{item.text}</Text>
-            <Button
-              icon="trash-can"
-              mode="contained"
-              style={styles.deleteButton}
-              onPress={() => {
-                setSelectedIdea(item.id);
-                setDeleteModalVisible(true);
-              }}
-            >
-              Delete
-            </Button>
-          </View>
-        )}
-      />
+          />
+        </View>
+      )}
       <Portal>
         <Dialog
           visible={isDeleteModalVisible}
@@ -132,7 +148,9 @@ export default function IdeaScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 8,
     backgroundColor: "rgb(240, 219, 255)",
   },
   fab: {
@@ -142,12 +160,17 @@ const styles = StyleSheet.create({
     bottom: 10,
   },
   personName: {
-    fontSize: 18,
+    fontSize: 20,
     marginBottom: 12,
   },
   ideaItem: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 20,
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    width: "100%",
     marginBottom: 16,
   },
   ideaImage: {
@@ -156,21 +179,9 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginRight: 8,
   },
-  ideaText: {
-    fontSize: 16,
-  },
   deleteButton: {
     marginLeft: "auto",
     backgroundColor: "#FF0000",
-  },
-  deleteButtonText: {
-    color: "#FFFFFF",
-  },
-  addButton: {
-    backgroundColor: "#0000FF",
-    padding: 16,
-    alignItems: "center",
-    borderRadius: 4,
   },
   closeButton: {
     position: "absolute",

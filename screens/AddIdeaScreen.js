@@ -1,13 +1,12 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   Image,
   useWindowDimensions,
   Modal,
 } from "react-native";
-import { TextInput, Button } from "react-native-paper";
+import { TextInput, Button, Dialog, Portal, Text } from "react-native-paper";
 import { PeopleContext } from "../context/PeopleProvider";
 import { Camera } from "expo-camera";
 import uuid from "react-native-uuid";
@@ -15,18 +14,13 @@ import uuid from "react-native-uuid";
 export default function AddIdeaScreen({ route, navigation }) {
   const { personId } = route.params;
   const { addIdea } = useContext(PeopleContext);
-
   const [ideaText, setIdeaText] = useState("");
-  const aspectRatio = 2 / 3;
-
-  const screen = useWindowDimensions();
-  const screenW = screen.width;
-
+  const [showValidationModal, setShowValidationModal] = useState(false);
   const [type, setType] = useState(Camera.Constants.Type.back);
   const cameraRef = useRef();
   const [hasPermit, setHasPermit] = useState(false);
   const [imageData, setImageData] = useState(null);
-  const [showCamera, setShowCamera] = useState(true);
+  const [showCamera] = useState(true);
   const [cameraModalVisible, setCameraModalVisible] = useState(false);
   const [retake, setRetake] = useState(false);
 
@@ -47,20 +41,17 @@ export default function AddIdeaScreen({ route, navigation }) {
       return;
     }
 
-    const photoSettings = {
-      quality: 0.8,
-      exif: true,
-    };
+    cameraRef.current
+      .takePictureAsync({ quality: 0.8, exif: true })
+      .then((photo) => {
+        if (photo) {
+          console.log(photo.uri);
 
-    cameraRef.current.takePictureAsync(photoSettings).then((photo) => {
-      if (photo) {
-        console.log(photo.uri);
-
-        const rotatedImage = [{ rotate: "270deg" }];
-        setImageData({ uri: photo.uri, transform: rotatedImage });
-        setCameraModalVisible(false);
-      }
-    });
+          const rotatedImage = [{ rotate: "270deg" }];
+          setImageData({ uri: photo.uri, transform: rotatedImage });
+          setCameraModalVisible(false);
+        }
+      });
   }
 
   function retakePhoto() {
@@ -78,6 +69,8 @@ export default function AddIdeaScreen({ route, navigation }) {
       };
       addIdea(personId, ideaData);
       navigation.navigate("Ideas", { personId });
+    } else {
+      setShowValidationModal(true);
     }
   };
 
@@ -148,7 +141,7 @@ export default function AddIdeaScreen({ route, navigation }) {
       >
         <View style={styles.cameraModalContainer}>
           <Camera style={{ flex: 1 }} type={type} ref={cameraRef} />
-          <View style={styles.buttonContainer}>
+          <View style={{ ...styles.buttonContainer, paddingVertical: 5 }}>
             <Button icon="content-save" mode="contained" onPress={takePhoto}>
               Take Photo
             </Button>
@@ -162,6 +155,22 @@ export default function AddIdeaScreen({ route, navigation }) {
           </View>
         </View>
       </Modal>
+
+      <Portal>
+        <Dialog
+          visible={showValidationModal}
+          onDismiss={() => setShowValidationModal(false)}
+        >
+          <Dialog.Content>
+            <Text>Gift idea required</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button title="OK" onPress={() => setShowValidationModal(false)}>
+              Ok
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 }
@@ -181,8 +190,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cameraModalContainer: {
+    padding: 10,
     flex: 1,
     justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   txt: {
     fontSize: 20,

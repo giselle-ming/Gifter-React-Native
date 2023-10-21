@@ -4,9 +4,9 @@ const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: "orange",
+    primary: "#EE7C3D",
     onPrimary: "white",
-    primaryContainer: "rgb(95, 43, 146)",
+    primaryContainer: "#552CC8",
     onPrimaryContainer: "rgb(240, 219, 255)",
     secondary: "yellow",
     onSecondary: "black",

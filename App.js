@@ -9,8 +9,27 @@ import IdeaScreen from "./screens/IdeaScreen";
 import AddIdeaScreen from "./screens/AddIdeaScreen";
 import PeopleProvider from "./context/PeopleProvider";
 import { theme } from "./theme/Theme";
+import { en, registerTranslation } from "react-native-paper-dates";
 
 const Stack = createNativeStackNavigator();
+registerTranslation("en", en);
+
+const screenOptions = {
+  headerStyle: {
+    backgroundColor: "#FB6F22",
+  },
+  headerTintColor: "#fff",
+  headerTitleStyle: {
+    fontWeight: "bold",
+  },
+};
+
+const screens = [
+  { name: "People", component: PeopleScreen },
+  { name: "Add Person", component: AddPersonScreen },
+  { name: "Ideas", component: IdeaScreen },
+  { name: "Add Idea", component: AddIdeaScreen },
+];
 
 export default function App() {
   return (
@@ -19,10 +38,14 @@ export default function App() {
         <PeopleProvider>
           <NavigationContainer>
             <Stack.Navigator initialRouteName="PeopleScreen">
-              <Stack.Screen name="People" component={PeopleScreen} />
-              <Stack.Screen name="Add Person" component={AddPersonScreen} />
-              <Stack.Screen name="Ideas" component={IdeaScreen} />
-              <Stack.Screen name="Add Idea" component={AddIdeaScreen} />
+              {screens.map((screen, index) => (
+                <Stack.Screen
+                  key={index}
+                  name={screen.name}
+                  component={screen.component}
+                  options={screenOptions}
+                />
+              ))}
             </Stack.Navigator>
           </NavigationContainer>
         </PeopleProvider>

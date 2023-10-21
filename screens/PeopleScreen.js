@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
-import { FlatList, View, StyleSheet, Pressable } from "react-native";
+import { FlatList, View, StyleSheet, Pressable, Image } from "react-native";
 import { PeopleContext } from "../context/PeopleProvider";
-import { FAB, Button, Dialog, Portal, Text } from "react-native-paper";
+import { FAB, Button, Dialog, Portal, Text, Card } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
@@ -20,7 +20,6 @@ export default function PeopleScreen() {
     setSelectedPerson(personId);
     setDeleteModalVisible(true);
   };
-  console.log(people);
 
   const sortList = people.slice().sort((a, b) => {
     const dateA = a.dob ? new Date(a.dob) : null;
@@ -36,9 +35,17 @@ export default function PeopleScreen() {
   return (
     <View style={styles.container}>
       {sortList.length === 0 ? (
-        <Text style={styles.emptyText}>
-          No people available. Please add a person.
-        </Text>
+        <View style={{ justifyContent: "center", alignItems: "center" }}>
+          <Text
+            style={{ paddingBottom: 20, fontSize: 20, textAlign: "center" }}
+          >
+            No people in your list, add someone.
+          </Text>
+          <Image
+            source={require("../assets/3779154.webp")}
+            style={{ width: 300, height: 300 }}
+          />
+        </View>
       ) : (
         <FlatList
           data={sortList}
@@ -46,36 +53,50 @@ export default function PeopleScreen() {
             item.id ? item.id.toString() : index.toString()
           }
           renderItem={({ item }) => (
-            <View style={styles.personItem}>
-              <View>
-                <Text style={styles.personName}>{item.name}</Text>
-                {item.dob && (
-                  <Text style={styles.personDob}>
-                    {new Date(item.dob).toLocaleDateString("en-CA", {
-                      timeZone: "America/Toronto",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </Text>
-                )}
+            <Card style={styles.personCard}>
+              <View style={styles.cardContent}>
+                <View>
+                  <Text style={styles.personName}>{item.name}</Text>
+                  {item.dob && (
+                    <Text style={styles.personDob}>
+                      {new Date(item.dob).toLocaleDateString("en-CA", {
+                        timeZone: "America/Toronto",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </Text>
+                  )}
+                </View>
+                <View style={styles.bulbContainer}>
+                  <Pressable
+                    onPress={() =>
+                      navigation.navigate("Ideas", {
+                        personId: item.id,
+                      })
+                    }
+                  >
+                    <Ionicons name="bulb-outline" size={30} color="blue" />
+                  </Pressable>
+                </View>
               </View>
-              <Pressable onPress={() => deleteOne(item.id)}>
-                <Ionicons name="ios-trash" size={24} color="red" />
-              </Pressable>
-              <Pressable onPress={() => editPerson(item.id)}>
-                <Ionicons name="create-outline" size={24} color="green" />
-              </Pressable>
-              <Ionicons
-                name="bulb-outline"
-                size={24}
-                color="blue"
-                onPress={() =>
-                  navigation.navigate("Ideas", {
-                    personId: item.id,
-                  })
-                }
-              />
-            </View>
+              <Card.Actions style={styles.cardContent}>
+                <Button
+                  icon="trash-can"
+                  mode="contained"
+                  style={styles.deleteButton}
+                  onPress={() => deleteOne(item.id)}
+                >
+                  Delete
+                </Button>
+                <Button
+                  icon="file-edit-outline"
+                  mode="contained"
+                  onPress={() => editPerson(item.id)}
+                >
+                  Edit
+                </Button>
+              </Card.Actions>
+            </Card>
           )}
         />
       )}
@@ -129,8 +150,14 @@ export default function PeopleScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 8,
     backgroundColor: "rgb(240, 219, 255)",
+  },
+  deleteButton: {
+    marginLeft: "auto",
+    backgroundColor: "#FF0000",
   },
   fab: {
     position: "absolute",
@@ -138,22 +165,28 @@ const styles = StyleSheet.create({
     right: 10,
     bottom: 10,
   },
-  emptyText: {
-    fontSize: 18,
-    textAlign: "center",
+  personCard: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 16,
+    width: "100%",
   },
-  personItem: {
+  cardContent: {
+    minWidth: 320,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
   },
   personName: {
-    fontSize: 18,
+    fontSize: 20,
+    fontWeight: "bold",
   },
   personDob: {
     fontSize: 16,
+  },
+  bulbContainer: {
+    position: "absolute",
+    top: 1,
+    right: 1,
   },
 });

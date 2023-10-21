@@ -1,15 +1,14 @@
 import React, { useState, useContext, useEffect } from "react";
 import { View, StyleSheet, KeyboardAvoidingView } from "react-native";
+import { TextInput, Button, Dialog, Portal, Text } from "react-native-paper";
 import { DatePickerInput } from "react-native-paper-dates";
 import { PeopleContext } from "../context/PeopleProvider";
-import { Dialog, Portal, Text, Button, TextInput } from "react-native-paper";
 import uuid from "react-native-uuid";
 
 export default function AddPersonScreen({ navigation, route }) {
   const { addPerson, editPerson } = useContext(PeopleContext);
   const [name, setName] = useState("");
   const [dob, setDob] = useState("");
-  const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const { personToEdit } = route.params || {};
   const [inputDate, setInputDate] = useState(undefined);
@@ -23,7 +22,6 @@ export default function AddPersonScreen({ navigation, route }) {
 
   const savePerson = () => {
     if (!name || !dob) {
-      setError("Name and date of birth are required.");
       setModalVisible(true);
     } else {
       if (personToEdit) {
@@ -58,6 +56,7 @@ export default function AddPersonScreen({ navigation, route }) {
         <DatePickerInput
           locale="en"
           label="Birthdate"
+          mode="outlined"
           value={inputDate || (personToEdit && new Date(personToEdit.dob))}
           onChange={(date) => {
             setInputDate(date);
@@ -65,8 +64,6 @@ export default function AddPersonScreen({ navigation, route }) {
           }}
           inputMode="start"
           animationType="slide"
-          style={{ width: "100%" }}
-          mode="outlined"
         />
       </View>
       <View style={styles.buttonContainer}>
@@ -79,19 +76,17 @@ export default function AddPersonScreen({ navigation, route }) {
           onPress={() => {
             navigation.navigate("People");
           }}
-          style={styles.cancelButton}
         >
           Cancel
         </Button>
       </View>
-
       <Portal>
-        <Dialog visible={modalVisible} onDismiss={() => setModalVisible(true)}>
+        <Dialog visible={modalVisible} onDismiss={() => {}}>
           <Dialog.Content>
-            <Text>{error}</Text>
+            <Text>Name and date of birth are required.</Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button title="OK" onPress={() => setModalVisible(!modalVisible)}>
+            <Button title="OK" onPress={() => setModalVisible(false)}>
               Ok
             </Button>
           </Dialog.Actions>
@@ -104,26 +99,21 @@ export default function AddPersonScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     padding: 16,
     backgroundColor: "rgb(240, 219, 255)",
   },
   inputContainer: {
     flex: 1,
-    justifyContent: "space-between",
-    alignItems: "center",
+    justifyContent: "flex-start",
+    marginTop: 20,
   },
   input: {
-    width: "100%",
     marginBottom: 20,
   },
   buttonContainer: {
-    flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-  },
-  cancelButton: {
-    marginLeft: 10,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
   },
 });
